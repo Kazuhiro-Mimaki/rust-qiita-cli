@@ -22,40 +22,54 @@ struct PostTag {
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     set_config();
-    let post_body = read_post();
+    let post = set_post();
+    println!("{:?}", &post);
+
     let client = reqwest::Client::new();
-    let post = set_post_body(&post_body);
     let endpoint = env::var("QIITA_API_ENDPOINT").unwrap() + "/items";
     let authorization = String::from("Bearer ") + &env::var("QIITA_API_TOKEN").unwrap().to_string();
-    println!("{:?}", &post);
+
     let res = client
         .post(endpoint)
         .header("Authorization", authorization)
         .json(&post)
         .send()
         .await;
-    // let res = reqwest::get(endpoint).await?.text().await?;
     println!("{:?}", res);
+
     Ok(())
 }
 
-fn set_post_body(post_body: &str) -> Post {
-    let mut tag = json!({});
-    tag["name"] = json!("hoge");
-    tag["versions"] = json!([]);
-    let tags = json!([tag]);
+fn set_post() -> Post {
     let post = Post {
-        title: "test".to_string(),
-        body: post_body.to_string(),
-        private: true,
-        tags: tags.to_string(),
+        title: set_title(),
+        body: set_body(),
+        private: set_is_private(),
+        tags: set_tags(),
     };
     post
 }
 
-fn read_post() -> String {
+fn set_title() -> String {
+    String::from("test")
+}
+
+fn set_body() -> String {
     let contents = fs::read_to_string("articles/test.md").unwrap();
     contents
+}
+
+fn set_is_private() -> bool {
+    true
+}
+
+fn set_tags() -> String {
+    let mut tag = json!({});
+    tag["name"] = json!("test");
+    tag["versions"] = json!([]);
+    // 任意の数tagをリストに詰める
+    let tags = json!([tag, tag, tag]);
+    tags.to_string()
 }
 
 fn set_config() {
