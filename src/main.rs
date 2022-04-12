@@ -2,28 +2,24 @@ use dotenv::dotenv;
 use reqwest::Error;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use serde_json::Value;
+use std::collections::HashMap;
 use std::env;
 use std::fs;
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(bound(deserialize = "'de: 'static"))]
 struct Post {
     title: String,
     body: String,
     private: bool,
-    tags: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct PostTag {
-    name: String,
-    versions: Vec<String>,
+    tags: Vec<HashMap<&'static str, String>>,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     set_config();
     let post = set_post();
-    println!("{:?}", &post);
 
     let client = reqwest::Client::new();
     let endpoint = env::var("QIITA_API_ENDPOINT").unwrap() + "/items";
@@ -34,20 +30,21 @@ async fn main() -> Result<(), Error> {
         .header("Authorization", authorization)
         .json(&post)
         .send()
-        .await;
+        .await?;
+
     println!("{:?}", res);
 
     Ok(())
 }
 
-fn set_post() -> Post {
+fn set_post() -> Value {
     let post = Post {
         title: set_title(),
         body: set_body(),
         private: set_is_private(),
         tags: set_tags(),
     };
-    post
+    json!(post)
 }
 
 fn set_title() -> String {
@@ -55,21 +52,21 @@ fn set_title() -> String {
 }
 
 fn set_body() -> String {
-    let contents = fs::read_to_string("articles/test.md").unwrap();
-    contents
+    let content = fs::read_to_string("articles/test.md").unwrap();
+    content
 }
 
 fn set_is_private() -> bool {
     true
 }
 
-fn set_tags() -> String {
-    let mut tag = json!({});
-    tag["name"] = json!("test");
-    tag["versions"] = json!([]);
+fn set_tags() -> Vec<HashMap<&'static str, String>> {
+    let mut tag = HashMap::new();
+    tag.insert("name", String::from("test"));
     // 任意の数tagをリストに詰める
-    let tags = json!([tag, tag, tag]);
-    tags.to_string()
+    let mut tags = Vec::new();
+    tags.push(tag);
+    tags
 }
 
 fn set_config() {
