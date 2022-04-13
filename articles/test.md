@@ -1,8 +1,9 @@
 ---
 title: test
-tags: test2,test1
+tags: [test2, test1]
 private: true
 ---
 
 # test
-qiitaエディタで変更
+
+qiita エディタで変更
