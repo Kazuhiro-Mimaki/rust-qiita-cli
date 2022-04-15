@@ -30,14 +30,6 @@ pub struct PostHeader {
     tags: Vec<PostTag>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct YamlPostHeader {
-    id: Option<String>,
-    title: String,
-    private: bool,
-    tags: Vec<String>,
-}
-
 impl Post {
     // api post用にjson化
     pub fn jsonify(&self) -> Value {
@@ -59,20 +51,14 @@ impl PostResponseHeader {
 
 // 記事のheader
 fn serde_header(md_header: &str) -> PostHeader {
-    let yaml_post_header: YamlPostHeader = serde_yaml::from_str(md_header).unwrap();
-    let tags = make_tag_struct(&yaml_post_header.tags);
-    let header = PostHeader {
-        id: yaml_post_header.id,
-        title: yaml_post_header.title,
-        private: yaml_post_header.private,
-        tags: tags,
-    };
+    let header: PostHeader = serde_yaml::from_str(md_header).unwrap();
     header
 }
 
 // 記事のbody
 fn serde_body(md_body: &str) -> String {
-    md_body.to_string()
+    let body: String = serde_yaml::from_str(md_body).unwrap();
+    body
 }
 
 // 記事(header+body -> post)
@@ -83,15 +69,4 @@ pub fn serde_post(md_post: &str) -> Post {
         header: serde_header(&split_str[1]),
         body: serde_body(&split_str[2]),
     }
-}
-
-// ["tag1", "tag2"] から [{"name": "tag1"}, {"name": "tag2"}] を生成
-fn make_tag_struct(yaml_post_header_tags: &Vec<String>) -> Vec<PostTag> {
-    let mut tags: Vec<PostTag> = Vec::new();
-    for tag in yaml_post_header_tags.iter() {
-        tags.push(PostTag {
-            name: tag.to_string(),
-        })
-    }
-    tags
 }

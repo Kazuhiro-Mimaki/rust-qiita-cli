@@ -10,7 +10,7 @@ mod post;
 async fn main() -> Result<(), Error> {
     config::set_default();
 
-    let md_post = fs::read_to_string("articles/test.md").unwrap();
+    let md_post = fs::read_to_string("articles/res.md").unwrap();
 
     let post = post::serde_post(&md_post);
     let json_post = post.jsonify();
