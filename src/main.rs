@@ -1,6 +1,8 @@
 use reqwest::Error;
 use std::env;
 use std::fs;
+use std::io::Write;
+
 mod config;
 mod post;
 
@@ -19,14 +21,29 @@ async fn main() -> Result<(), Error> {
 
     println!("{:?}", &json_post);
 
-    let res = client
+    let post_res_header = client
         .post(endpoint)
         .header("Authorization", authorization)
         .json(&json_post)
         .send()
+        .await?
+        .json::<post::PostResponseHeader>()
         .await?;
 
-    println!("{:?}", res);
+    // let res = client
+    //     .get(endpoint)
+    //     .header("Authorization", authorization)
+    //     .send()
+    //     .await?
+    //     .text()
+    //     .await?;
+
+    println!("{:?}", post_res_header);
+
+    // ファイル書き込み
+    let mut f = fs::File::create("articles/res.md").unwrap();
+    let new_content = post_res_header.to_str() + &post.body;
+    f.write_all(new_content.as_bytes()).unwrap();
 
     Ok(())
 }

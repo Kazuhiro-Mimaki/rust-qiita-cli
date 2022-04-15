@@ -1,25 +1,38 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::Value;
-use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(bound(deserialize = "'de: 'static"))]
-pub struct Post {
-    header: PostHeader,
-    body: String,
+pub struct PostResponseHeader {
+    id: String,
+    title: String,
+    tags: Vec<PostTag>,
+    private: bool,
+    updated_at: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(bound(deserialize = "'de: 'static"))]
+pub struct PostTag {
+    name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Post {
+    pub header: PostHeader,
+    pub body: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PostHeader {
+    id: Option<String>,
     title: String,
     private: bool,
-    tags: Vec<HashMap<&'static str, String>>,
+    tags: Vec<PostTag>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct YamlPostHeader {
+    id: Option<String>,
     title: String,
     private: bool,
     tags: Vec<String>,
@@ -37,11 +50,19 @@ impl Post {
     }
 }
 
+impl PostResponseHeader {
+    pub fn to_str(&self) -> String {
+        let separator = "---";
+        serde_yaml::to_string(self).unwrap() + separator
+    }
+}
+
 // 記事のheader
 fn serde_header(md_header: &str) -> PostHeader {
     let yaml_post_header: YamlPostHeader = serde_yaml::from_str(md_header).unwrap();
-    let tags = make_tags_hashmap_vector(yaml_post_header.tags);
+    let tags = make_tag_struct(&yaml_post_header.tags);
     let header = PostHeader {
+        id: yaml_post_header.id,
         title: yaml_post_header.title,
         private: yaml_post_header.private,
         tags: tags,
@@ -65,14 +86,12 @@ pub fn serde_post(md_post: &str) -> Post {
 }
 
 // ["tag1", "tag2"] から [{"name": "tag1"}, {"name": "tag2"}] を生成
-fn make_tags_hashmap_vector(
-    yaml_post_header_tags: Vec<String>,
-) -> Vec<HashMap<&'static str, String>> {
-    let mut tags: Vec<HashMap<&'static str, String>> = Vec::new();
+fn make_tag_struct(yaml_post_header_tags: &Vec<String>) -> Vec<PostTag> {
+    let mut tags: Vec<PostTag> = Vec::new();
     for tag in yaml_post_header_tags.iter() {
-        let mut new_tag = HashMap::new();
-        new_tag.insert("name", String::from(tag));
-        tags.push(new_tag);
+        tags.push(PostTag {
+            name: tag.to_string(),
+        })
     }
     tags
 }
