@@ -24,10 +24,11 @@ pub struct Post {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PostHeader {
-    id: Option<String>,
+    pub id: Option<String>,
     title: String,
     private: bool,
     tags: Vec<PostTag>,
+    updated_at: Option<String>,
 }
 
 impl Post {
@@ -37,7 +38,7 @@ impl Post {
             "title": self.header.title,
             "private": self.header.private,
             "tags": self.header.tags,
-            "body": self.body
+            "body": self.body,
         })
     }
 }
@@ -57,8 +58,7 @@ fn serde_header(md_header: &str) -> PostHeader {
 
 // 記事のbody
 fn serde_body(md_body: &str) -> String {
-    let body: String = serde_yaml::from_str(md_body).unwrap();
-    body
+    md_body.to_string()
 }
 
 // 記事(header+body -> post)
