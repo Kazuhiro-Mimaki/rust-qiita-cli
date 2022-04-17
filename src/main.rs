@@ -50,9 +50,9 @@ async fn main() -> Result<(), Error> {
     }
 
     // ファイル書き込み
+    let markdown_post = post::parse_http_response(&response);
     let mut f = fs::File::create("articles/res.md").unwrap();
-    let new_content = response.to_str() + &post.body;
-    f.write_all(new_content.as_bytes()).unwrap();
+    f.write_all(markdown_post.as_bytes()).unwrap();
 
     // let res = client
     //     .get(ENDPOINT)

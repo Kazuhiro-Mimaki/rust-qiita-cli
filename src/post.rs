@@ -4,14 +4,15 @@ use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PostResponse {
-    id: String,
+    id: Option<String>,
     title: String,
     tags: Vec<PostTag>,
     private: bool,
-    updated_at: String,
+    updated_at: Option<String>,
+    body: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PostTag {
     name: String,
 }
@@ -26,8 +27,8 @@ pub struct Post {
 pub struct PostHeader {
     pub id: Option<String>,
     title: String,
-    private: bool,
     tags: Vec<PostTag>,
+    private: bool,
     updated_at: Option<String>,
 }
 
@@ -45,9 +46,21 @@ impl Post {
     }
 }
 
-impl PostResponse {
-    pub fn to_str(&self) -> String {
+impl PostHeader {
+    pub fn to_md_header(&self) -> String {
         serde_yaml::to_string(self).unwrap() + SEPARATOR
+    }
+}
+
+impl PostResponse {
+    fn header(&self) -> PostHeader {
+        PostHeader {
+            id: self.id.clone(),
+            title: self.title.clone(),
+            tags: self.tags.clone(),
+            private: self.private,
+            updated_at: self.updated_at.clone(),
+        }
     }
 }
 
@@ -60,4 +73,10 @@ pub fn parse_markdown(md_post: &str) -> Post {
         header: header,
         body: body,
     }
+}
+
+pub fn parse_http_response(res: &PostResponse) -> String {
+    let header = &res.header();
+    let markdown_post = header.to_md_header() + &res.body;
+    markdown_post
 }
