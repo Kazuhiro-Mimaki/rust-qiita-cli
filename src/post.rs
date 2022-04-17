@@ -3,7 +3,7 @@ use serde_json::json;
 use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PostResponseHeader {
+pub struct PostResponse {
     id: String,
     title: String,
     tags: Vec<PostTag>,
@@ -31,6 +31,8 @@ pub struct PostHeader {
     updated_at: Option<String>,
 }
 
+const SEPARATOR: &str = "---";
+
 impl Post {
     // api post用にjson化
     pub fn jsonify(&self) -> Value {
@@ -43,30 +45,19 @@ impl Post {
     }
 }
 
-impl PostResponseHeader {
+impl PostResponse {
     pub fn to_str(&self) -> String {
-        let separator = "---";
-        serde_yaml::to_string(self).unwrap() + separator
+        serde_yaml::to_string(self).unwrap() + SEPARATOR
     }
 }
 
-// 記事のheader
-fn serde_header(md_header: &str) -> PostHeader {
-    let header: PostHeader = serde_yaml::from_str(md_header).unwrap();
-    header
-}
-
-// 記事のbody
-fn serde_body(md_body: &str) -> String {
-    md_body.to_string()
-}
-
-// 記事(header+body -> post)
-pub fn serde_post(md_post: &str) -> Post {
-    let split_str: Vec<&str> = md_post.split("---").collect();
+pub fn parse_markdown(md_post: &str) -> Post {
+    let split_str: Vec<&str> = md_post.split(SEPARATOR).collect();
+    let header: PostHeader = serde_yaml::from_str(split_str[1]).unwrap();
+    let body = String::from(split_str[2]);
 
     Post {
-        header: serde_header(&split_str[1]),
-        body: serde_body(&split_str[2]),
+        header: header,
+        body: body,
     }
 }
