@@ -5,6 +5,7 @@ use std::io::Write;
 
 mod config;
 mod post;
+mod api;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -14,9 +15,11 @@ async fn main() -> Result<(), Error> {
     let post = post::parse_markdown(&md_post);
     let json_post = post.jsonify();
 
-    let client = reqwest::Client::new();
-    let endpoint = env::var("QIITA_API_ENDPOINT").unwrap() + "/items";
-    let authorization = String::from("Bearer ") + &env::var("QIITA_API_TOKEN").unwrap().to_string();
+    let api_client = api::ApiClient {
+        client: reqwest::Client::new(),
+        endpoint: env::var("QIITA_API_ENDPOINT").unwrap() + "/items",
+        authorization: String::from("Bearer ") + &env::var("QIITA_API_TOKEN").unwrap().to_string(),
+    };
 
     let response: post::PostResponse;
 
@@ -24,28 +27,12 @@ async fn main() -> Result<(), Error> {
         // idがある場合はupdate
         Some(id) => {
             println!("Update post with id={:?}", id);
-
-            response = client
-                .patch(format!("{}{}{}", endpoint, "/", &id))
-                .header("Authorization", authorization)
-                .json(&json_post)
-                .send()
-                .await?
-                .json::<post::PostResponse>()
-                .await?;
+            response = api_client.patch(&id, &json_post).await;
         }
         // idがない場合はpost
         None => {
             println!("New post");
-
-            response = client
-                .post(endpoint)
-                .header("Authorization", authorization)
-                .json(&json_post)
-                .send()
-                .await?
-                .json::<post::PostResponse>()
-                .await?;
+            response = api_client.post(&json_post).await;
         }
     }
 
