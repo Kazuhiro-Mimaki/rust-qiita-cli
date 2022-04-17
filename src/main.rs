@@ -1,26 +1,27 @@
 use reqwest::Error;
 use std::env;
-use std::fs;
-use std::io::Write;
 
-mod config;
-mod post;
 mod api;
+mod config;
+mod file;
+mod post;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     config::set_default();
 
-    let md_post = fs::read_to_string("articles/res.md").unwrap();
-    let post = post::parse_markdown(&md_post);
-    let json_post = post.jsonify();
+    let file_path = "articles/res.md";
 
+    let md_post = file::read(&file_path);
+    let post = post::parse_markdown(&md_post);
+    
     let api_client = api::ApiClient {
         client: reqwest::Client::new(),
         endpoint: env::var("QIITA_API_ENDPOINT").unwrap() + "/items",
         authorization: String::from("Bearer ") + &env::var("QIITA_API_TOKEN").unwrap().to_string(),
     };
-
+    
+    let json_post = post.jsonify();
     let response: post::PostResponse;
 
     match post.header.id {
@@ -38,8 +39,7 @@ async fn main() -> Result<(), Error> {
 
     // ファイル書き込み
     let markdown_post = post::parse_http_response(&response);
-    let mut f = fs::File::create("articles/res.md").unwrap();
-    f.write_all(markdown_post.as_bytes()).unwrap();
+    file::update(&file_path, &markdown_post.as_bytes());
 
     // let res = client
     //     .get(ENDPOINT)

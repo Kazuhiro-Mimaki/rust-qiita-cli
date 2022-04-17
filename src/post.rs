@@ -80,4 +80,3 @@ pub fn parse_http_response(res: &PostResponse) -> String {
     let markdown_post = header.to_md_header() + &res.body;
     markdown_post
 }
-

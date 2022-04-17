@@ -1,9 +1,11 @@
 ---
 title: test
-tags: [test2, test1]
+tags:
+  - name: test1
+  - name: test2
 private: true
 ---
 
-# test
+# test2
 
-qiita エディタで変更
+second test post.
