@@ -45,14 +45,6 @@ async fn main() -> Result<(), Error> {
         // ファイル書き込み
         let markdown_post = post::parse_http_response(&response);
         file::update(&file_path, &markdown_post.as_bytes());
-
-        // let res = client
-        //     .get(ENDPOINT)
-        //     .header("Authorization", Authorization)
-        //     .send()
-        //     .await?
-        //     .text()
-        //     .await?;
     }
 
     Ok(())

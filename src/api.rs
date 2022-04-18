@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::post;
 use serde_json::Value;
 
@@ -9,6 +11,20 @@ pub struct ApiClient {
 }
 
 impl ApiClient {
+    pub async fn get_detail(&self, post_id: &str) -> post::PostResponse {
+        let response = self
+            .client
+            .get(format!("{}{}{}", &self.endpoint, "/", post_id))
+            .header("Authorization", &self.authorization)
+            .send()
+            .await
+            .unwrap()
+            .json::<post::PostResponse>()
+            .await
+            .unwrap();
+        response
+    }
+
     pub async fn post(&self, json_post: &Value) -> post::PostResponse {
         let response = self
             .client
@@ -39,12 +55,3 @@ impl ApiClient {
         response
     }
 }
-
-// response = client
-// .post(endpoint)
-// .header("Authorization", authorization)
-// .json(&json_post)
-// .send()
-// .await?
-// .json::<post::PostResponse>()
-// .await?;
