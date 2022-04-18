@@ -11,7 +11,7 @@ mod post;
 async fn main() -> Result<(), Error> {
     config::set_default();
     const POST_DIR: &str = "posts";
-    let post_dir_paths = fs::read_dir(POST_DIR).unwrap();
+    let post_dir_paths = file::read_dir(POST_DIR);
 
     for post_file in post_dir_paths {
         let file_path = post_file.unwrap().path();
