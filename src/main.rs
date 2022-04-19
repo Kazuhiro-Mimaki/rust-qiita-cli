@@ -1,6 +1,5 @@
 use reqwest::Error;
 use std::env;
-use std::fs;
 
 mod api;
 mod config;
