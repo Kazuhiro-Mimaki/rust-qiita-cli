@@ -4,7 +4,7 @@ use std::env;
 mod api;
 mod config;
 mod file;
-mod post;
+mod parser;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -15,7 +15,7 @@ async fn main() -> Result<(), Error> {
         let file_path = post_file.unwrap().path();
 
         let md_post = file::read_file(&file_path);
-        let post = post::parse_markdown(&md_post);
+        let post = parser::parse_markdown(&md_post);
 
         let api_client = api::ApiClient {
             client: reqwest::Client::new(),
@@ -25,7 +25,7 @@ async fn main() -> Result<(), Error> {
         };
 
         let json_post = post.jsonify();
-        let response: post::PostResponse;
+        let response: parser::PostResponse;
 
         match post.header.id {
             // idがある場合はupdate
@@ -41,7 +41,7 @@ async fn main() -> Result<(), Error> {
         }
 
         // ファイル書き込み
-        let markdown_post = post::parse_http_response(&response);
+        let markdown_post = parser::parse_http_response(&response);
         file::update(&file_path, &markdown_post.as_bytes());
     }
 

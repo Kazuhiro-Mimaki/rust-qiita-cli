@@ -1,4 +1,4 @@
-use crate::post;
+use crate::parser;
 use serde_json::Value;
 
 // ====================
@@ -17,7 +17,7 @@ pub struct ApiClient {
 // ====================
 
 impl ApiClient {
-    pub async fn get_detail(&self, post_id: &str) -> post::PostResponse {
+    pub async fn get_detail(&self, post_id: &str) -> parser::PostResponse {
         let response = self
             .client
             .get(format!("{}{}{}", &self.endpoint, "/", post_id))
@@ -25,13 +25,13 @@ impl ApiClient {
             .send()
             .await
             .unwrap()
-            .json::<post::PostResponse>()
+            .json::<parser::PostResponse>()
             .await
             .unwrap();
         response
     }
 
-    pub async fn post(&self, json_post: &Value) -> post::PostResponse {
+    pub async fn post(&self, json_post: &Value) -> parser::PostResponse {
         let response = self
             .client
             .post(&self.endpoint)
@@ -40,13 +40,13 @@ impl ApiClient {
             .send()
             .await
             .unwrap()
-            .json::<post::PostResponse>()
+            .json::<parser::PostResponse>()
             .await
             .unwrap();
         response
     }
 
-    pub async fn patch(&self, post_id: &str, json_post: &Value) -> post::PostResponse {
+    pub async fn patch(&self, post_id: &str, json_post: &Value) -> parser::PostResponse {
         let response = self
             .client
             .patch(format!("{}{}{}", &self.endpoint, "/", post_id))
@@ -55,7 +55,7 @@ impl ApiClient {
             .send()
             .await
             .unwrap()
-            .json::<post::PostResponse>()
+            .json::<parser::PostResponse>()
             .await
             .unwrap();
         response
