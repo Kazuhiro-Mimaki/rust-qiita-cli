@@ -13,3 +13,4 @@ pub fn set_default() {
 // ====================
 
 pub const SEPARATOR: &str = "---";
+pub const POST_DIR: &str = "posts";

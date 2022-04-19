@@ -9,8 +9,7 @@ mod post;
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     config::set_default();
-    const POST_DIR: &str = "posts";
-    let post_dir_paths = file::read_dir(POST_DIR);
+    let post_dir_paths = file::read_dir(config::POST_DIR);
 
     for post_file in post_dir_paths {
         let file_path = post_file.unwrap().path();
