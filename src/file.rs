@@ -1,5 +1,9 @@
 use std::{fs, io::Write, path::PathBuf};
 
+// ====================
+// function
+// ====================
+
 pub fn read_dir(dir_path: &str) -> fs::ReadDir {
     fs::read_dir(dir_path).unwrap()
 }

@@ -2,6 +2,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::Value;
 
+use crate::config;
+
+// ====================
+// struct
+// ====================
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PostResponse {
     id: Option<String>,
@@ -32,7 +38,9 @@ pub struct PostHeader {
     updated_at: Option<String>,
 }
 
-const SEPARATOR: &str = "---";
+// ====================
+// impl
+// ====================
 
 impl Post {
     // api post用にjson化
@@ -48,7 +56,7 @@ impl Post {
 
 impl PostHeader {
     pub fn to_md_header(&self) -> String {
-        serde_yaml::to_string(self).unwrap() + SEPARATOR
+        serde_yaml::to_string(self).unwrap() + config::SEPARATOR
     }
 }
 
@@ -64,8 +72,12 @@ impl PostResponse {
     }
 }
 
+// ====================
+// function
+// ====================
+
 pub fn parse_markdown(md_post: &str) -> Post {
-    let split_str: Vec<&str> = md_post.split(SEPARATOR).collect();
+    let split_str: Vec<&str> = md_post.split(config::SEPARATOR).collect();
     let header: PostHeader = serde_yaml::from_str(split_str[1]).unwrap();
     let body = String::from(split_str[2]);
 

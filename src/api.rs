@@ -1,12 +1,20 @@
 use crate::post;
 use serde_json::Value;
 
+// ====================
+// struct
+// ====================
+
 #[derive(Debug, Default)]
 pub struct ApiClient {
     pub client: reqwest::Client,
     pub endpoint: String,
     pub authorization: String,
 }
+
+// ====================
+// impl
+// ====================
 
 impl ApiClient {
     pub async fn get_detail(&self, post_id: &str) -> post::PostResponse {
